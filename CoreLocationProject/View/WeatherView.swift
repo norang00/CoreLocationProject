@@ -9,7 +9,7 @@ import UIKit
 import MapKit
 import SnapKit
 
-class WeatherView: UIView {
+final class WeatherView: UIView {
     
     let mapView: MKMapView = {
         let view = MKMapView()
@@ -31,6 +31,7 @@ class WeatherView: UIView {
     let weatherMainLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
+        label.numberOfLines = 2
         label.font = .systemFont(ofSize: 16)
         label.adjustsFontSizeToFitWidth = true
         return label
@@ -183,13 +184,13 @@ class WeatherView: UIView {
         }
         
         weatherImageView.snp.makeConstraints { make in
-            make.top.equalTo(mapView.snp.bottom).offset(20)
+            make.top.equalTo(mapView.snp.bottom).offset(10)
             make.leading.equalToSuperview().inset(20)
-            make.size.equalTo(60)
+            make.size.equalTo(80)
         }
         
         weatherMainLabel.snp.makeConstraints { make in
-            make.top.equalTo(weatherImageView.snp.bottom).offset(10)
+            make.top.equalTo(weatherImageView.snp.bottom)
             make.leading.trailing.equalTo(weatherImageView)
         }
         

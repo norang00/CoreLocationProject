@@ -31,19 +31,19 @@ final class WeatherViewController: UIViewController {
         checkDeviceLocationService()
     }
     
+    // MARK: - Actions
     private func setupActions() {
         weatherView.currentLocationButton.addTarget(self, action: #selector(currentLocationButtonTapped), for: .touchUpInside)
         weatherView.refreshButton.addTarget(self, action: #selector(refreshButtonTapped), for: .touchUpInside)
     }
     
-    // MARK: - Actions
+    // 현재 위치 가져오기
     @objc private func currentLocationButtonTapped() {
-        // 현재 위치 가져오기 구현
         checkDeviceLocationService()
     }
     
+    // 날씨 새로고침
     @objc private func refreshButtonTapped() {
-        // 날씨 새로고침 구현
         getCurrentWeatherOf(currentCoordinate ?? defaultCoordinate)
     }
 }
@@ -58,6 +58,10 @@ extension WeatherViewController: CLLocationManagerDelegate {
         DispatchQueue.global().async {
             if CLLocationManager.locationServicesEnabled() {
                 self.checkUserAuthorization()
+            } else {
+                DispatchQueue.main.async {
+                    self.showAlert(title: "기기의 위치 서비스 권한 없음", message: "설정 > 개인정보 보호 및 보안 > 위치 서비스 항목을 허용해주세요.")
+                }
             }
         }
     }
@@ -75,9 +79,8 @@ extension WeatherViewController: CLLocationManagerDelegate {
         case .denied:
             print("denied")
             isAuthorized = false
-            setRegionAndAnnotation(defaultCoordinate)
             DispatchQueue.main.async {
-                self.showAlert(title: "위치 서비스 권한 없음", message: "기기의 설정에서 위치 서비스를 허용해주세요.")
+                self.showAlert(title: "앱의 위치 서비스 권한 없음", message: "앱 설정에서 위치 서비스를 허용해주세요.")
             }
         case .authorizedAlways:
             print("authorizedAlways")
@@ -123,6 +126,7 @@ extension WeatherViewController: CLLocationManagerDelegate {
     // 4-1. 위치 정보 업데이트 실패
     func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
         print(#function)
+        setRegionAndAnnotation(defaultCoordinate)
     }
     
     // 5. 위치 정보를 기반으로 Map 에 표시
@@ -136,6 +140,8 @@ extension WeatherViewController: CLLocationManagerDelegate {
         annotation.title = isAuthorized ? "현재 위치" : "청년취업사관학교 도봉캠퍼스"
         annotation.coordinate = coordinate
         weatherView.mapView.addAnnotation(annotation)
+     
+        getCurrentWeatherOf(coordinate)
     }
 }
 
@@ -143,14 +149,14 @@ extension WeatherViewController: CLLocationManagerDelegate {
 extension WeatherViewController {
     
     private func getCurrentWeatherOf(_ coordinate: CLLocationCoordinate2D) {
+        print(#function)
+
         let lat = coordinate.latitude
         let lon = coordinate.longitude
-        print(#function, lat, lon)
         
         NetworkManager.shared.getCurrentWeather(.currentWeather(lat: lat, lon: lon, appId: APIKey.openWeatherKey), CurrentWeather.self) { response in
             switch response {
             case .success(let success):
-                print(success)
                 self.weatherView.weatherInfoLabel.isHidden = true
                 self.weatherView.weatherOverlayView.isHidden = true
                 self.weatherView.minTempValue.text = success.main.tempMin.formatted() + "℃"
@@ -163,9 +169,9 @@ extension WeatherViewController {
                     let imageURL = URL(string: OpenWeatherRequest.getIconURL(weather.icon))
                     self.weatherView.weatherImageView.kf.setImage(with: imageURL)
                     self.weatherView.weatherMainLabel.text = weather.description
+                    self.navigationItem.title = weather.main
                 }
             case .failure(let failure):
-                print(failure)
                 self.showAlert(title: "문제가 발생했어요", message: failure.localizedDescription)
             }
         }
@@ -176,16 +182,25 @@ extension WeatherViewController {
 extension WeatherViewController {
     
     private func showAlert(title: String, message: String) {
+        print(#function)
+        
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        if title.contains("권한") {
-            let settingAction = UIAlertAction(title: "설정으로 이동", style: .default) {_ in
+        if title.contains("앱의 위치 서비스") {
+            let settingAction = UIAlertAction(title: "설정으로 이동", style: .default) { _ in
                 UIApplication.shared.open(URL(string:UIApplication.openSettingsURLString)!)
             }
-            let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+            let cancelAction = UIAlertAction(title: "취소", style: .cancel) { _ in
+                self.setRegionAndAnnotation(self.defaultCoordinate)
+            }
             alertController.addAction(settingAction)
             alertController.addAction(cancelAction)
+            // [고민]
+            // 기기 권한이 없는 경우에도 알림을 통해 일반 설정 화면을 열어주고 싶은데, 일반 설정 화면을 열어주는 코드는 존재하지 않고,
+            // 위 코드는 앱 자체의 설정으로 이동하는 거라 안 좋은 플로우가 될 것 같다. 그냥 설정으로 이동을 없애야 할듯
         } else {
-            let confirmAction = UIAlertAction(title: "확인", style: .default)
+            let confirmAction = UIAlertAction(title: "확인", style: .default) { _ in
+                self.setRegionAndAnnotation(self.defaultCoordinate)
+            }
             alertController.addAction(confirmAction)
         }
         present(alertController, animated: true)

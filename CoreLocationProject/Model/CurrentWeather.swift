@@ -9,20 +9,13 @@ import Foundation
 
 // MARK: - CurrentWeather
 struct CurrentWeather: Decodable {
-    let coord: Coord
     let weather: [Weather]
     let main: Main
     let wind: Wind
 }
 
-// MARK: - Coord
-struct Coord: Decodable {
-    let lon, lat: Double
-}
-
 // MARK: - Weather
 struct Weather: Decodable {
-    let id: Int
     let main, description, icon: String
 }
 
