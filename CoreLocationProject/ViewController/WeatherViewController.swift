@@ -25,7 +25,9 @@ class WeatherViewController: UIViewController {
         super.viewDidLoad()
 
         setupActions()
+        
         locationManager.delegate = self
+        checkDeviceLocationService()
     }
     
     private func setupActions() {
@@ -70,7 +72,11 @@ extension WeatherViewController: CLLocationManagerDelegate {
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
             locationManager.requestWhenInUseAuthorization()
         case .denied:
-            print("설정으로 이동하는 Alert를 추가해야 함")
+            print("denied")
+            setRegionAndAnnotation(defaultCoordinate)
+            DispatchQueue.main.async {
+                self.showAlert()
+            }
         case .authorizedAlways:
             print("authorizedAlways")
         case .authorizedWhenInUse:
@@ -124,14 +130,29 @@ extension WeatherViewController: CLLocationManagerDelegate {
 
 // MARK: - 네트워크 관련
 extension WeatherViewController {
-    
-    func getCurrentWeatherOf(_ coordinate: CLLocationCoordinate2D) {
+    private func getCurrentWeatherOf(_ coordinate: CLLocationCoordinate2D) {
         let lat = coordinate.latitude
         let lon = coordinate.longitude
         print(#function, lat, lon)
         NetworkManager.shared.getCurrentWeather(.currentWeather(lat: lat, lon: lon, appId: APIKey.openWeatherKey), CurrentWeather.self) { Result in
             print(Result)
         }
+    }
+}
+
+// MARK: - Alert
+extension WeatherViewController {
+    
+    private func showAlert() {
+        let alertController = UIAlertController(title: "위치 서비스 권한 없음", message: "기기의 설정에서 위치 서비스를 허용해주세요.", preferredStyle: .alert)
+        let confirmAction = UIAlertAction(title: "설정으로 이동", style: .default) {_ in
+            UIApplication.shared.open(URL(string:UIApplication.openSettingsURLString)!)
+        }
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+        alertController.addAction(confirmAction)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true)
     }
     
 }
