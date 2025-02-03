@@ -16,12 +16,107 @@ class WeatherView: UIView {
         return view
     }()
     
+    let weatherImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    }()
+    
+    let weatherOverlayView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        return view
+    }()
+
+    let weatherMainLabel: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 16)
+        label.adjustsFontSizeToFitWidth = true
+        return label
+    }()
+    
     let weatherInfoLabel: UILabel = {
         let label = UILabel()
         label.numberOfLines = 0
         label.textAlignment = .center
         label.font = .systemFont(ofSize: 16)
         label.text = "날씨 정보를 불러오는 중..."
+        return label
+    }()
+    
+    let maxTempLabel: UILabel = {
+        let label = UILabel()
+        label.text = "최고 기온"
+        label.textAlignment = .left
+        label.font = .systemFont(ofSize: 16)
+        return label
+    }()
+    
+    let maxTempValue: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 16)
+        return label
+    }()
+    
+    let currentTempLabel: UILabel = {
+        let label = UILabel()
+        label.text = "현재 기온"
+        label.textAlignment = .left
+        label.font = .systemFont(ofSize: 16)
+        return label
+    }()
+    
+    let currentTempValue: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 16)
+        return label
+    }()
+    
+    let minTempLabel: UILabel = {
+        let label = UILabel()
+        label.text = "최저 기온"
+        label.textAlignment = .left
+        label.font = .systemFont(ofSize: 16)
+        return label
+    }()
+    
+    let minTempValue: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 16)
+        return label
+    }()
+    
+    let humidityLabel: UILabel = {
+        let label = UILabel()
+        label.text = "습도"
+        label.textAlignment = .left
+        label.font = .systemFont(ofSize: 16)
+        return label
+    }()
+    
+    let humidityValue: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 16)
+        return label
+    }()
+    
+    let windSpeedLabel: UILabel = {
+        let label = UILabel()
+        label.text = "풍속"
+        label.textAlignment = .left
+        label.font = .systemFont(ofSize: 16)
+        return label
+    }()
+    
+    let windSpeedValue: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 16)
         return label
     }()
     
@@ -68,7 +163,15 @@ class WeatherView: UIView {
     private func setupUI() {
         backgroundColor = .white
         
-        [mapView, weatherInfoLabel, currentLocationButton, refreshButton].forEach {
+        [mapView,
+         weatherImageView, weatherMainLabel,
+         minTempLabel, minTempValue,
+         currentTempLabel, currentTempValue,
+         maxTempLabel, maxTempValue,
+         humidityLabel, humidityValue,
+         windSpeedLabel, windSpeedValue,
+         weatherOverlayView, weatherInfoLabel,
+         currentLocationButton, refreshButton].forEach {
             addSubview($0)
         }
     }
@@ -79,9 +182,76 @@ class WeatherView: UIView {
             make.height.equalTo(snp.height).multipliedBy(0.5)
         }
         
+        weatherImageView.snp.makeConstraints { make in
+            make.top.equalTo(mapView.snp.bottom).offset(20)
+            make.leading.equalToSuperview().inset(20)
+            make.size.equalTo(60)
+        }
+        
+        weatherMainLabel.snp.makeConstraints { make in
+            make.top.equalTo(weatherImageView.snp.bottom).offset(10)
+            make.leading.trailing.equalTo(weatherImageView)
+        }
+        
+        weatherOverlayView.snp.makeConstraints { make in
+            make.top.equalTo(mapView.snp.bottom).offset(10)
+            make.leading.trailing.equalTo(mapView)
+            make.bottom.equalTo(safeAreaLayoutGuide)
+        }
+        
         weatherInfoLabel.snp.makeConstraints { make in
             make.top.equalTo(mapView.snp.bottom).offset(20)
             make.leading.trailing.equalToSuperview().inset(20)
+        }
+        
+        maxTempLabel.snp.makeConstraints { make in
+            make.top.equalTo(mapView.snp.bottom).offset(20)
+            make.leading.equalTo(weatherImageView.snp.trailing).offset(20)
+        }
+        
+        maxTempValue.snp.makeConstraints { make in
+            make.centerY.equalTo(maxTempLabel)
+            make.leading.equalTo(maxTempLabel.snp.trailing).offset(10)
+        }
+        
+        currentTempLabel.snp.makeConstraints { make in
+            make.top.equalTo(maxTempLabel.snp.bottom).offset(20)
+            make.leading.equalTo(weatherImageView.snp.trailing).offset(20)
+        }
+        
+        currentTempValue.snp.makeConstraints { make in
+            make.centerY.equalTo(currentTempLabel)
+            make.leading.equalTo(currentTempLabel.snp.trailing).offset(10)
+        }
+        
+        minTempLabel.snp.makeConstraints { make in
+            make.top.equalTo(currentTempLabel.snp.bottom).offset(20)
+            make.leading.equalTo(weatherImageView.snp.trailing).offset(20)
+        }
+        
+        minTempValue.snp.makeConstraints { make in
+            make.centerY.equalTo(minTempLabel)
+            make.leading.equalTo(minTempLabel.snp.trailing).offset(10)
+        }
+
+        humidityLabel.snp.makeConstraints { make in
+            make.top.equalTo(mapView.snp.bottom).offset(20)
+            make.leading.equalTo(minTempValue.snp.trailing).offset(20)
+        }
+        
+        humidityValue.snp.makeConstraints { make in
+            make.centerY.equalTo(humidityLabel)
+            make.leading.equalTo(humidityLabel.snp.trailing).offset(10)
+        }
+
+        windSpeedLabel.snp.makeConstraints { make in
+            make.top.equalTo(humidityLabel.snp.bottom).offset(20)
+            make.leading.equalTo(minTempValue.snp.trailing).offset(20)
+        }
+        
+        windSpeedValue.snp.makeConstraints { make in
+            make.centerY.equalTo(windSpeedLabel)
+            make.leading.equalTo(windSpeedLabel.snp.trailing).offset(10)
         }
         
         currentLocationButton.snp.makeConstraints { make in

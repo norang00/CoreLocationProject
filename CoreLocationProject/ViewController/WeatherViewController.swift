@@ -8,14 +8,15 @@
 import UIKit
 import MapKit
 import CoreLocation
+import Kingfisher
 
-class WeatherViewController: UIViewController {
+final class WeatherViewController: UIViewController {
     
-    let weatherView = WeatherView()
-    let locationManager = CLLocationManager()
-    let defaultCoordinate = CLLocationCoordinate2D(latitude: 37.6543906, longitude: 127.0498832)
-    var isAuthorized: Bool = false
-    let dispatchGroup = DispatchGroup()
+    private let weatherView = WeatherView()
+    private let locationManager = CLLocationManager()
+    private var currentCoordinate: CLLocationCoordinate2D?
+    private let defaultCoordinate = CLLocationCoordinate2D(latitude: 37.6543906, longitude: 127.0498832)
+    private var isAuthorized: Bool = false
 
     // MARK: - Lifecycle
     override func loadView() {
@@ -26,7 +27,6 @@ class WeatherViewController: UIViewController {
         super.viewDidLoad()
 
         setupActions()
-        
         locationManager.delegate = self
         checkDeviceLocationService()
     }
@@ -44,7 +44,7 @@ class WeatherViewController: UIViewController {
     
     @objc private func refreshButtonTapped() {
         // 날씨 새로고침 구현
-        getCurrentWeatherOf(defaultCoordinate)
+        getCurrentWeatherOf(currentCoordinate ?? defaultCoordinate)
     }
 }
 
@@ -52,7 +52,7 @@ class WeatherViewController: UIViewController {
 extension WeatherViewController: CLLocationManagerDelegate {
     
     // 1. 디바이스의 위치 서비스 자체가 켜져 있는지 확인
-    func checkDeviceLocationService() {
+    private func checkDeviceLocationService() {
         print(#function)
         
         DispatchQueue.global().async {
@@ -63,7 +63,7 @@ extension WeatherViewController: CLLocationManagerDelegate {
     }
     
     // 2. 유저의 위치 서비스 허용 권한을 확인
-    func checkUserAuthorization() {
+    private func checkUserAuthorization() {
         print(#function)
 
         let status = locationManager.authorizationStatus
@@ -103,7 +103,7 @@ extension WeatherViewController: CLLocationManagerDelegate {
     }
     
     // 3. 위치 정보 수집을 시작
-    func checkCurrentLocation() {
+    private func checkCurrentLocation() {
         locationManager.startUpdatingLocation()
     }
     
@@ -113,6 +113,8 @@ extension WeatherViewController: CLLocationManagerDelegate {
 
         if let coordinate = locations.last?.coordinate {
             setRegionAndAnnotation(coordinate)
+            getCurrentWeatherOf(coordinate)
+            currentCoordinate = coordinate
         }
         // 성공 후 정보 수집 중지
         locationManager.stopUpdatingLocation()
@@ -124,7 +126,7 @@ extension WeatherViewController: CLLocationManagerDelegate {
     }
     
     // 5. 위치 정보를 기반으로 Map 에 표시
-    func setRegionAndAnnotation(_ coordinate: CLLocationCoordinate2D) {
+    private func setRegionAndAnnotation(_ coordinate: CLLocationCoordinate2D) {
         let region = MKCoordinateRegion.init(center: coordinate, latitudinalMeters: 500, longitudinalMeters: 500)
         weatherView.mapView.setRegion(region, animated: true)
         
@@ -149,7 +151,19 @@ extension WeatherViewController {
             switch response {
             case .success(let success):
                 print(success)
-                self.weatherView.weatherInfoLabel.text = "현재 온도:\(success.main.temp)\n최저 온도:\(success.main.tempMin)\n최고 온도:\(success.main.tempMax)\n습도:\(success.main.humidity)\n풍속:\(success.wind.speed)"
+                self.weatherView.weatherInfoLabel.isHidden = true
+                self.weatherView.weatherOverlayView.isHidden = true
+                self.weatherView.minTempValue.text = success.main.tempMin.formatted() + "℃"
+                self.weatherView.currentTempValue.text = success.main.temp.formatted() + "℃"
+                self.weatherView.maxTempValue.text = success.main.tempMax.formatted() + "℃"
+                self.weatherView.humidityValue.text = success.main.humidity.formatted() + "%"
+                self.weatherView.windSpeedValue.text = success.wind.speed.formatted() + "m/s"
+                
+                if let weather = success.weather.last {
+                    let imageURL = URL(string: OpenWeatherRequest.getIconURL(weather.icon))
+                    self.weatherView.weatherImageView.kf.setImage(with: imageURL)
+                    self.weatherView.weatherMainLabel.text = weather.description
+                }
             case .failure(let failure):
                 print(failure)
                 self.showAlert(title: "문제가 발생했어요", message: failure.localizedDescription)

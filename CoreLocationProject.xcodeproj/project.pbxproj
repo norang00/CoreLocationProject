@@ -10,6 +10,7 @@
 		EE42B21A2D50A1DF00607625 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = EE42B2192D50A1DF00607625 /* SnapKit */; };
 		EE42B3102D50AD7E00607625 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = EE42B30F2D50AD7E00607625 /* .gitignore */; };
 		EE42B31D2D50B37500607625 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = EE42B31C2D50B37500607625 /* Alamofire */; };
+		EE42B3262D50E4E900607625 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = EE42B3252D50E4E900607625 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +44,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EE42B3262D50E4E900607625 /* Kingfisher in Frameworks */,
 				EE42B21A2D50A1DF00607625 /* SnapKit in Frameworks */,
 				EE42B31D2D50B37500607625 /* Alamofire in Frameworks */,
 			);
@@ -90,6 +92,7 @@
 			packageProductDependencies = (
 				EE42B2192D50A1DF00607625 /* SnapKit */,
 				EE42B31C2D50B37500607625 /* Alamofire */,
+				EE42B3252D50E4E900607625 /* Kingfisher */,
 			);
 			productName = CoreLocationProject;
 			productReference = EE42B1FE2D50A10900607625 /* CoreLocationProject.app */;
@@ -122,6 +125,7 @@
 			packageReferences = (
 				EE42B2182D50A1DF00607625 /* XCRemoteSwiftPackageReference "SnapKit" */,
 				EE42B31B2D50B37500607625 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				EE42B3242D50E4E900607625 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EE42B1FF2D50A10900607625 /* Products */;
@@ -165,6 +169,7 @@
 				DEVELOPMENT_TEAM = 6KQJH558XZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CoreLocationProject/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "날씨앱 -홍규희-";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -196,6 +201,7 @@
 				DEVELOPMENT_TEAM = 6KQJH558XZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CoreLocationProject/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "날씨앱 -홍규희-";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -376,6 +382,14 @@
 				minimumVersion = 5.10.2;
 			};
 		};
+		EE42B3242D50E4E900607625 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.1.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -388,6 +402,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EE42B31B2D50B37500607625 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
+		};
+		EE42B3252D50E4E900607625 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EE42B3242D50E4E900607625 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
