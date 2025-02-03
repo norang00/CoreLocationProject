@@ -13,6 +13,7 @@ class WeatherViewController: UIViewController {
     
     let weatherView = WeatherView()
     
+    var isAuthorized: Bool = false
     let locationManager = CLLocationManager()
     let defaultCoordinate = CLLocationCoordinate2D(latitude: 37.6543906, longitude: 127.0498832)
     
@@ -73,6 +74,7 @@ extension WeatherViewController: CLLocationManagerDelegate {
             locationManager.requestWhenInUseAuthorization()
         case .denied:
             print("denied")
+            isAuthorized = false
             setRegionAndAnnotation(defaultCoordinate)
             DispatchQueue.main.async {
                 self.showAlert()
@@ -81,6 +83,7 @@ extension WeatherViewController: CLLocationManagerDelegate {
             print("authorizedAlways")
         case .authorizedWhenInUse:
             print("authorizedWhenInUse")
+            isAuthorized = true
             checkCurrentLocation()
         default:
             print("default")
@@ -125,6 +128,11 @@ extension WeatherViewController: CLLocationManagerDelegate {
     func setRegionAndAnnotation(_ coordinate: CLLocationCoordinate2D) {
         let region = MKCoordinateRegion.init(center: coordinate, latitudinalMeters: 500, longitudinalMeters: 500)
         weatherView.mapView.setRegion(region, animated: true)
+        
+        let annotation = MKPointAnnotation()
+        annotation.title = isAuthorized ? "현재 위치" : "청년취업사관학교 도봉캠퍼스"
+        annotation.coordinate = coordinate
+        weatherView.mapView.addAnnotation(annotation)
     }
 }
 
