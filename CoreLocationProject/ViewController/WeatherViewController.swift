@@ -12,11 +12,11 @@ import CoreLocation
 class WeatherViewController: UIViewController {
     
     let weatherView = WeatherView()
-    
-    var isAuthorized: Bool = false
     let locationManager = CLLocationManager()
     let defaultCoordinate = CLLocationCoordinate2D(latitude: 37.6543906, longitude: 127.0498832)
-    
+    var isAuthorized: Bool = false
+    let dispatchGroup = DispatchGroup()
+
     // MARK: - Lifecycle
     override func loadView() {
         view = weatherView
@@ -77,7 +77,7 @@ extension WeatherViewController: CLLocationManagerDelegate {
             isAuthorized = false
             setRegionAndAnnotation(defaultCoordinate)
             DispatchQueue.main.async {
-                self.showAlert()
+                self.showAlert(title: "위치 서비스 권한 없음", message: "기기의 설정에서 위치 서비스를 허용해주세요.")
             }
         case .authorizedAlways:
             print("authorizedAlways")
@@ -114,7 +114,6 @@ extension WeatherViewController: CLLocationManagerDelegate {
         if let coordinate = locations.last?.coordinate {
             setRegionAndAnnotation(coordinate)
         }
-        
         // 성공 후 정보 수집 중지
         locationManager.stopUpdatingLocation()
     }
@@ -129,6 +128,8 @@ extension WeatherViewController: CLLocationManagerDelegate {
         let region = MKCoordinateRegion.init(center: coordinate, latitudinalMeters: 500, longitudinalMeters: 500)
         weatherView.mapView.setRegion(region, animated: true)
         
+        let allAnnotations = weatherView.mapView.annotations
+        weatherView.mapView.removeAnnotations(allAnnotations)
         let annotation = MKPointAnnotation()
         annotation.title = isAuthorized ? "현재 위치" : "청년취업사관학교 도봉캠퍼스"
         annotation.coordinate = coordinate
@@ -138,12 +139,21 @@ extension WeatherViewController: CLLocationManagerDelegate {
 
 // MARK: - 네트워크 관련
 extension WeatherViewController {
+    
     private func getCurrentWeatherOf(_ coordinate: CLLocationCoordinate2D) {
         let lat = coordinate.latitude
         let lon = coordinate.longitude
         print(#function, lat, lon)
-        NetworkManager.shared.getCurrentWeather(.currentWeather(lat: lat, lon: lon, appId: APIKey.openWeatherKey), CurrentWeather.self) { Result in
-            print(Result)
+        
+        NetworkManager.shared.getCurrentWeather(.currentWeather(lat: lat, lon: lon, appId: APIKey.openWeatherKey), CurrentWeather.self) { response in
+            switch response {
+            case .success(let success):
+                print(success)
+                self.weatherView.weatherInfoLabel.text = "현재 온도:\(success.main.temp)\n최저 온도:\(success.main.tempMin)\n최고 온도:\(success.main.tempMax)\n습도:\(success.main.humidity)\n풍속:\(success.wind.speed)"
+            case .failure(let failure):
+                print(failure)
+                self.showAlert(title: "문제가 발생했어요", message: failure.localizedDescription)
+            }
         }
     }
 }
@@ -151,16 +161,19 @@ extension WeatherViewController {
 // MARK: - Alert
 extension WeatherViewController {
     
-    private func showAlert() {
-        let alertController = UIAlertController(title: "위치 서비스 권한 없음", message: "기기의 설정에서 위치 서비스를 허용해주세요.", preferredStyle: .alert)
-        let confirmAction = UIAlertAction(title: "설정으로 이동", style: .default) {_ in
-            UIApplication.shared.open(URL(string:UIApplication.openSettingsURLString)!)
+    private func showAlert(title: String, message: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        if title.contains("권한") {
+            let settingAction = UIAlertAction(title: "설정으로 이동", style: .default) {_ in
+                UIApplication.shared.open(URL(string:UIApplication.openSettingsURLString)!)
+            }
+            let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+            alertController.addAction(settingAction)
+            alertController.addAction(cancelAction)
+        } else {
+            let confirmAction = UIAlertAction(title: "확인", style: .default)
+            alertController.addAction(confirmAction)
         }
-        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
-        alertController.addAction(confirmAction)
-        alertController.addAction(cancelAction)
-        
         present(alertController, animated: true)
     }
-    
 }
