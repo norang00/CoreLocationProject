@@ -44,6 +44,9 @@ final class WeatherViewController: UIViewController {
     
     // 날씨 새로고침
     @objc private func refreshButtonTapped() {
+        weatherView.weatherOverlayView.isHidden = false
+        weatherView.weatherInfoLabel.isHidden = false
+
         getCurrentWeatherOf(currentCoordinate ?? defaultCoordinate)
     }
 }
