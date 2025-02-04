@@ -27,7 +27,7 @@ final class WeatherView: UIView {
         view.backgroundColor = .white
         return view
     }()
-
+    
     let weatherMainLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
@@ -121,9 +121,30 @@ final class WeatherView: UIView {
         return label
     }()
     
+    let photoImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(systemName: "photo")
+        imageView.contentMode = .scaleAspectFit
+        imageView.tintColor = .lightGray
+        return imageView
+    }()
+    
     let currentLocationButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "location.fill"), for: .normal)
+        button.backgroundColor = .white
+        button.tintColor = .systemBlue
+        button.layer.cornerRadius = 25
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOffset = CGSize(width: 0, height: 2)
+        button.layer.shadowOpacity = 0.2
+        button.layer.shadowRadius = 4
+        return button
+    }()
+    
+    let photoButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "photo"), for: .normal)
         button.backgroundColor = .white
         button.tintColor = .systemBlue
         button.layer.cornerRadius = 25
@@ -172,7 +193,8 @@ final class WeatherView: UIView {
          humidityLabel, humidityValue,
          windSpeedLabel, windSpeedValue,
          weatherOverlayView, weatherInfoLabel,
-         currentLocationButton, refreshButton].forEach {
+         photoImageView,
+         currentLocationButton, photoButton, refreshButton].forEach {
             addSubview($0)
         }
     }
@@ -180,7 +202,7 @@ final class WeatherView: UIView {
     private func setupConstraints() {
         mapView.snp.makeConstraints { make in
             make.top.leading.trailing.equalTo(safeAreaLayoutGuide)
-            make.height.equalTo(snp.height).multipliedBy(0.5)
+            make.height.equalTo(snp.height).multipliedBy(0.3)
         }
         
         weatherImageView.snp.makeConstraints { make in
@@ -255,8 +277,20 @@ final class WeatherView: UIView {
             make.leading.equalTo(windSpeedLabel.snp.trailing).offset(10)
         }
         
+        photoImageView.snp.makeConstraints { make in
+            make.top.equalTo(minTempLabel).offset(50)
+            make.leading.trailing.equalTo(safeAreaLayoutGuide)
+            make.height.equalTo(snp.height).multipliedBy(0.25)
+        }
+        
         currentLocationButton.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(20)
+            make.bottom.equalTo(safeAreaLayoutGuide).offset(-20)
+            make.width.height.equalTo(50)
+        }
+        
+        photoButton.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
             make.bottom.equalTo(safeAreaLayoutGuide).offset(-20)
             make.width.height.equalTo(50)
         }

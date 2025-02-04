@@ -34,12 +34,24 @@ final class WeatherViewController: UIViewController {
     // MARK: - Actions
     private func setupActions() {
         weatherView.currentLocationButton.addTarget(self, action: #selector(currentLocationButtonTapped), for: .touchUpInside)
+        weatherView.photoButton.addTarget(self, action: #selector(photoButtonTapped), for: .touchUpInside)
         weatherView.refreshButton.addTarget(self, action: #selector(refreshButtonTapped), for: .touchUpInside)
     }
     
     // 현재 위치 가져오기
     @objc private func currentLocationButtonTapped() {
         checkDeviceLocationService()
+    }
+    
+    // 사진 선택하기
+    @objc private func photoButtonTapped() {
+        let photoVC = PhotoViewController()
+        photoVC.photoClosure = { photo in
+            self.weatherView.photoImageView.image = photo
+        }
+        let navVC = UINavigationController(rootViewController: photoVC)
+        navVC.modalPresentationStyle = .fullScreen
+        present(navVC, animated: true)
     }
     
     // 날씨 새로고침
@@ -197,9 +209,6 @@ extension WeatherViewController {
             }
             alertController.addAction(settingAction)
             alertController.addAction(cancelAction)
-            // [고민]
-            // 기기 권한이 없는 경우에도 알림을 통해 일반 설정 화면을 열어주고 싶은데, 일반 설정 화면을 열어주는 코드는 존재하지 않고,
-            // 위 코드는 앱 자체의 설정으로 이동하는 거라 안 좋은 플로우가 될 것 같다. 그냥 설정으로 이동을 없애야 할듯
         } else {
             let confirmAction = UIAlertAction(title: "확인", style: .default) { _ in
                 self.setRegionAndAnnotation(self.defaultCoordinate)
